@@ -72,7 +72,7 @@ export class DevToolsManager implements vs.Disposable {
 				const canLaunchDevToolsThroughService = isRunningLocally
 					&& !process.env.DART_CODE_IS_TEST_RUN
 					&& await waitFor(() => this.debugCommands.vmServices.serviceIsRegistered(VmService.LaunchDevTools), 500);
-				if (canLaunchDevToolsThroughService) {
+				if (false && canLaunchDevToolsThroughService) {
 					try {
 						await session.session.customRequest(
 							"service",
@@ -110,7 +110,35 @@ export class DevToolsManager implements vs.Disposable {
 				const vmServiceUri = vs.Uri.parse(session.vmServiceUri);
 				const exposedUrl = await envUtils.exposeUrl(vmServiceUri, this.logger);
 				const fullUrl = `${url}?${paramsString}&uri=${encodeURIComponent(exposedUrl)}`;
-				await envUtils.openInBrowser(fullUrl, this.logger);
+				// TEMP ///////////
+				const panel = vs.window.createWebviewPanel(
+					"dartDevTools",
+					"Dart DevTools",
+					vs.ViewColumn.Two,
+					{
+						enableScripts: true,
+						// localResourceRoots: [vs.Uri.file(path.join(this.extensionPath, "resources/devtools"))],
+						localResourceRoots: [],
+						retainContextWhenHidden: true,
+					},
+				);
+				// Note: For this to work, DevTools will need a suitable x-frame-options header.
+				// For local testing, this will work:
+				// server.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+				const uri = vs.Uri.parse(url);
+				panel.webview.html = `
+				<html>
+				<head>
+					<meta http-equiv="Content-Security-Policy" content="default-src 'self' http://${uri.authority};">
+				</head>
+				<body>
+					<iframe src="${fullUrl}" width="100%" height="900"></frame>
+				</body>
+				</html>
+				`;
+				// TEMP ///////////
+
+				// await envUtils.openInBrowser(fullUrl, this.logger);
 			});
 
 			this.devToolsStatusBarItem.text = "Dart DevTools";
