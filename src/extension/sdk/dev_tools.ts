@@ -132,7 +132,7 @@ export class DevToolsManager implements vs.Disposable {
 					<meta http-equiv="Content-Security-Policy" content="default-src 'self' http://${uri.authority};">
 				</head>
 				<body>
-					<iframe src="${fullUrl}" width="100%" height="900"></frame>
+					<iframe src="${fullUrl}" width="100%" height="900" frameborder="0"></frame>
 				</body>
 				</html>
 				`;
@@ -200,7 +200,7 @@ class DevToolsService extends StdIOService<UnknownNotification> {
 		super(new CategoryLogger(logger, LogCategory.DevTools), config.maxLogLineLength);
 
 		const pubBinPath = path.join(sdks.dart!, pubPath);
-		const args = ["global", "run", "devtools", "--machine", "--enable-notifications", "--try-ports", "10"];
+		const args = ["global", "run", "devtools", "--machine", /*"--enable-notifications",*/ "--try-ports", "10"];
 
 		// Store the port we'll use for later so we can re-bind to the same port if we restart.
 		portToBind = config.devToolsPort // Always config first
