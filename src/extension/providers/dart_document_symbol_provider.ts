@@ -3,7 +3,7 @@ import { Outline } from "../../shared/analysis_server_types";
 import { Logger } from "../../shared/interfaces";
 import { waitFor } from "../../shared/utils/promises";
 import { toRange } from "../../shared/vscode/utils";
-import { getSymbolKindForElementKind } from "../analysis/analyzer_das";
+import { getCodeOffset, getElementName, getSymbolKindForElementKind } from "../analysis/analyzer_das";
 import { DasFileTracker } from "../analysis/file_tracker_das";
 
 export class DartDocumentSymbolProvider implements DocumentSymbolProvider {
@@ -17,15 +17,12 @@ export class DartDocumentSymbolProvider implements DocumentSymbolProvider {
 	}
 
 	private convertResult(document: TextDocument, outline: Outline): DocumentSymbol {
-		const name = outline.element.name
-			? outline.element.name
-			: (outline.element.kind === "EXTENSION" ? "<unnamed extension>" : "<unnamed>");
 		const location = outline.element.location || outline;
 		const symbol = new DocumentSymbol(
-			name,
+			getElementName(outline.element),
 			outline.element.parameters || "",
 			getSymbolKindForElementKind(this.logger, outline.element.kind),
-			this.getCodeOffset(document, outline),
+			getCodeOffset(document, outline),
 			toRange(document, location.offset, location.length),
 		);
 
@@ -45,9 +42,5 @@ export class DartDocumentSymbolProvider implements DocumentSymbolProvider {
 		if (outline.element.kind === "CONSTRUCTOR_INVOCATION" || outline.element.kind === "FUNCTION_INVOCATION")
 			return false;
 		return true;
-	}
-
-	private getCodeOffset(document: TextDocument, outline: Outline & { codeOffset?: number, codeLength?: number }) {
-		return toRange(document, outline.codeOffset || outline.offset, outline.codeLength || outline.length);
 	}
 }

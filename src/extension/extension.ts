@@ -56,6 +56,7 @@ import { LspAnalyzerStatusReporter } from "./lsp/analyzer_status_reporter";
 import { LspClosingLabelsDecorations } from "./lsp/closing_labels_decorations";
 import { LspGoToSuperCommand } from "./lsp/go_to_super";
 import { AssistCodeActionProvider } from "./providers/assist_code_action_provider";
+import { DartCallHierarchyProvider } from "./providers/dart_call_hiearchy_provider";
 import { DartCompletionItemProvider } from "./providers/dart_completion_item_provider";
 import { DartDiagnosticProvider } from "./providers/dart_diagnostic_provider";
 import { DartDocumentSymbolProvider } from "./providers/dart_document_symbol_provider";
@@ -288,6 +289,7 @@ export async function activate(context: vs.ExtensionContext, isRestart: boolean 
 		// Dart only.
 		context.subscriptions.push(vs.languages.registerCodeActionsProvider(DART_MODE, new SourceCodeActionProvider(), SourceCodeActionProvider.metadata));
 		context.subscriptions.push(vs.languages.registerImplementationProvider(DART_MODE, new DartImplementationProvider(dasAnalyzer)));
+		context.subscriptions.push(vs.languages.registerCallHierarchyProvider(DART_MODE, new DartCallHierarchyProvider(dasAnalyzer)));
 
 		if (config.showMainCodeLens) {
 			const codeLensProvider = new MainCodeLensProvider(logger, dasAnalyzer);

@@ -7,6 +7,7 @@ import { LogCategory } from "../../shared/enums";
 import { DartSdks, Logger } from "../../shared/interfaces";
 import { CategoryLogger } from "../../shared/logging";
 import { PromiseCompleter, versionIsAtLeast } from "../../shared/utils";
+import { toRange } from "../../shared/vscode/utils";
 import { WorkspaceContext } from "../../shared/workspace";
 import { Analytics } from "../analytics";
 import { config } from "../config";
@@ -279,7 +280,17 @@ export class DasAnalyzerClient extends AnalyzerGen {
 	}
 }
 
-export function getSymbolKindForElementKind(logger: Logger, kind: as.ElementKind | string): vs.SymbolKind {
+export function getElementName(element: as.Element | undefined): string {
+	return element?.name
+		? element?.name
+		: (element?.kind === "EXTENSION" ? "<unnamed extension>" : "<unnamed>");
+}
+
+export function getCodeOffset(document: vs.TextDocument, outline: as.Outline & { codeOffset?: number, codeLength?: number }) {
+	return toRange(document, outline.codeOffset || outline.offset, outline.codeLength || outline.length);
+}
+
+export function getSymbolKindForElementKind(logger: Logger, kind: as.ElementKind | string | undefined): vs.SymbolKind {
 	switch (kind) {
 		case "CLASS":
 		case "CLASS_TYPE_ALIAS":
